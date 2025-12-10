@@ -164,14 +164,14 @@ function main(workbook: ExcelScript.Workbook,
 function findColumn(searchTerm: string, headerRange: ExcelScript.Range){
     // gets the values of the headers
     let headers = headerRange.getValues()[0];
-    let adjCol = 0;
+    let targetCol = 0;
 
     for (let col = 0; col < headers.length; col++){
         if (headers[col].toString().toLowerCase() == searchTerm.toLowerCase()) {
-          adjCol = col;
+          targetCol = col;
         }
     }
-    return adjCol;
+    return targetCol;
 }
 
 
