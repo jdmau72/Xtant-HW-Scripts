@@ -19,9 +19,9 @@ function main(workbook: ExcelScript.Workbook,
 	//selectedSheet = workbook.getActiveWorksheet();
 	
 	// first copy this worksheet to a new sheet, so it can be rolled back if need be
-	let selectedSheet = workbook.addWorksheet()
-	selectedSheet.activate();
-
+    let selectedSheet = workbook.getActiveWorksheet().copy();
+    selectedSheet.activate();
+	
 	// set the indices of each column
 	let headerRange = selectedSheet.getRange("A1:Z1");
 	let adjColIndex = findColumnIndex("Status", headerRange);
@@ -49,7 +49,6 @@ function main(workbook: ExcelScript.Workbook,
 	//selectedSheet.getRange("A:A").delete(ExcelScript.DeleteShiftDirection.left);
 
 	// clear Status column and replace with LOT ADJ  
-	selectedSheet.getRangeByIndexes(0, adjColIndex)
 	selectedSheet.getRange(`${lotAdjCol}:${lotAdjCol}`).clear(ExcelScript.ClearApplyTo.contents);
 	selectedSheet.getRange(`${lotAdjCol}1`).setValue("LOT ADJ");
 
