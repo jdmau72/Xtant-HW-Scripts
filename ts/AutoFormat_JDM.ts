@@ -16,27 +16,53 @@ function main(workbook: ExcelScript.Workbook,
 						hasExpirationDate: true | false = false) {
 
 
-	selectedSheet = workbook.getActiveWorksheet();
+	//selectedSheet = workbook.getActiveWorksheet();
 	
+	// first copy this worksheet to a new sheet, so it can be rolled back if need be
+	let selectedSheet = workbook.addWorksheet()
+	selectedSheet.activate();
+
+	// set the indices of each column
+	let headerRange = selectedSheet.getRange("A1:Z1");
+	let adjColIndex = findColumnIndex("Status", headerRange);
+	let lotColIndex = findColumnIndex("Lot", headerRange);
+	let itemColIndex = findColumnIndex("Item Number", headerRange);
+	let qtyColIndex = findColumnIndex("QTY", headerRange);
+	let binColIndex = findColumnIndex("Bin Number", headerRange);
+	let locColIndex = findColumnIndex("Location", headerRange);
+	let expDateColIndex = findColumnIndex("EXP Date", headerRange);
+				
+	// set column values that are used later
+	let lotAdjCol = indexToLetter(adjColIndex);
+	// lotAdjCol = "E";
+
+	let expDateCol = indexToLetter(expDateColIndex);
+	// expDateCol = "G";
+
+	let notesCol = indexToLetter(expDateColIndex + 1); // want to put the notes column to the right of EXP date
+	// notesCol = "H";
+
+	let itemNumCol = indexToLetter(itemColIndex);
+	// itemNumCol = "B";
+
 	// remove the Location column first
-	selectedSheet.getRange("A:A").delete(ExcelScript.DeleteShiftDirection.left);
+	//selectedSheet.getRange("A:A").delete(ExcelScript.DeleteShiftDirection.left);
 
 	// clear Status column and replace with LOT ADJ  
-	selectedSheet.getRange("E:E").clear(ExcelScript.ClearApplyTo.contents);
-	selectedSheet.getRange("E1").setValue("LOT ADJ");
+	selectedSheet.getRangeByIndexes(0, adjColIndex)
+	selectedSheet.getRange(`${lotAdjCol}:${lotAdjCol}`).clear(ExcelScript.ClearApplyTo.contents);
+	selectedSheet.getRange(`${lotAdjCol}1`).setValue("LOT ADJ");
 
 	// create NOTES column
-	selectedSheet.getRange("H1").copyFrom(selectedSheet.getRange("G1"), ExcelScript.RangeCopyType.formats, false, false);
-	selectedSheet.getRange("H1").setValue("NOTES");
+	selectedSheet.getRange(`${notesCol}1`).copyFrom(selectedSheet.getRange(`${expDateCol}1`), ExcelScript.RangeCopyType.formats, false, false);
+	selectedSheet.getRange(`${notesCol}1`).setValue("NOTES");
 
 	// if EXP date is false, hide the EXP date column
-	if (hasExpirationDate == false) { selectedSheet.getRange("G:G").setColumnHidden(true); }
+	if (!hasExpirationDate) { 
+		selectedSheet.getRange(`${expDateCol}:${expDateCol}`).setColumnHidden(true); 
+	}
 
-	// set column values that are used later
-	lotAdjCol = "E";
-	notesCol = "H";
-	expDateCol = "G";
-	itemNumCol = "B";
+	
 	
 	// set text size, spacing, make it neat 
 	selectedSheet.getRange().getFormat().getFont().setSize(14);
@@ -55,7 +81,7 @@ function main(workbook: ExcelScript.Workbook,
 
 	// now sets the formats on this range
 	defineConditionalFormat_Adj("#FFFF00", false);	// adj first rule, overwritten by others
-	if (hasExpirationDate == true) { defineConditionalFormat_ExpDate("#FF6565"); }
+	if (hasExpirationDate) { defineConditionalFormat_ExpDate("#FF6565"); }
 	defineConditionalFormat("fail", "#FF0000");
 	defineConditionalFormat("EXTRA", "#92D050");
 	defineConditionalFormat("QAHOLD", "FF6565");
@@ -164,3 +190,27 @@ function defineConditionalFormat_ItemBorders_Top(){
 	conditionalFormatting.setPriority(0);
 }
 
+
+// HELPER FUNCTIONS ---------------------------------------------------------------------------------------- \\
+function findColumnIndex(searchTerm: string, headerRange: ExcelScript.Range = selectedSheet.getRange("A1:Z1")){
+    // gets the values of the headers
+    let headers = headerRange.getValues()[0];
+    let targetCol = 0;
+
+    for (let col = 0; col < headers.length; col++){
+        if (headers[col].toString().toLowerCase() == searchTerm.toLowerCase()) {
+          targetCol = col;
+        }
+    }
+    return targetCol;
+}
+
+function indexToLetter(i: number) {
+	let letters = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	return letters[i];
+}
+
+function findColumnLetter(searchTerm: string, headerRange: ExcelScript.Range = selectedSheet.getRange("A1:Z1")){
+	let colIndex = findColumnIndex(searchTerm, headerRange);
+	return (indexToLetter(colIndex));
+}
