@@ -19,9 +19,9 @@ function main(workbook: ExcelScript.Workbook,
 	//selectedSheet = workbook.getActiveWorksheet();
 	
 	// first copy this worksheet to a new sheet, so it can be rolled back if need be
-    let selectedSheet = workbook.getActiveWorksheet().copy();
+    selectedSheet = workbook.getActiveWorksheet().copy();
     selectedSheet.activate();
-	
+
 	// set the indices of each column
 	let headerRange = selectedSheet.getRange("A1:Z1");
 	let adjColIndex = findColumnIndex("Status", headerRange);
@@ -33,16 +33,16 @@ function main(workbook: ExcelScript.Workbook,
 	let expDateColIndex = findColumnIndex("EXP Date", headerRange);
 				
 	// set column values that are used later
-	let lotAdjCol = indexToLetter(adjColIndex);
+	lotAdjCol = indexToLetter(adjColIndex);
 	// lotAdjCol = "E";
 
-	let expDateCol = indexToLetter(expDateColIndex);
+	expDateCol = indexToLetter(expDateColIndex);
 	// expDateCol = "G";
 
-	let notesCol = indexToLetter(expDateColIndex + 1); // want to put the notes column to the right of EXP date
+	notesCol = indexToLetter(expDateColIndex + 1); // want to put the notes column to the right of EXP date
 	// notesCol = "H";
 
-	let itemNumCol = indexToLetter(itemColIndex);
+	itemNumCol = indexToLetter(itemColIndex);
 	// itemNumCol = "B";
 
 	// remove the Location column first
@@ -123,6 +123,7 @@ function defineConditionalFormat_Adj(color: string, colOnly: boolean = false) {
 	let condition: string;
 
 	condition = '=AND(ISNUMBER(SEARCH("LOT ADJ",$' + lotAdjCol + '1))=FALSE, OR(ISTEXT($' + lotAdjCol + '1),ISNUMBER($' + lotAdjCol + '1)))';
+	// =AND(ISNUMBER(SEARCH("LOT ADJ",$E1))=FALSE, OR(ISTEXT($E1),ISNUMBER($E1)))
 
 	// if its just for the adjustment col, uses only the adjustment column
 	if (colOnly == true) {
@@ -205,7 +206,7 @@ function findColumnIndex(searchTerm: string, headerRange: ExcelScript.Range = se
 }
 
 function indexToLetter(i: number) {
-	let letters = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	let letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	return letters[i];
 }
 
